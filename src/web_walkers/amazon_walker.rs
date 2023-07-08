@@ -1,5 +1,3 @@
-#[allow(unused_imports)]
-use regex::Regex;
 use serde_json::json;
 use thirtyfour::prelude::*;
 
@@ -72,6 +70,7 @@ pub async fn get_all_records(search_name: &str) -> Result<Vec<RecordsResults>, W
 
 #[test]
 fn is_valid_amazon_url() {
+    use regex::Regex;
     // Define a regular expression pattern for matching Amazon URLs
     let pattern = Regex::new(r"^https?://(www\.)?amazon\.[a-z]{2,3}/.*$").unwrap();
     let url = &get_url("testing search").replace("{}", "1");
