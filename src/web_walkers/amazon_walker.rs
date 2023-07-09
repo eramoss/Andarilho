@@ -1,5 +1,5 @@
 use super::*;
-
+use serde::Serialize;
 pub fn get_url(item_name: &str) -> String {
     let item_name = item_name.replace(' ', "+");
     let url = format!(
@@ -9,7 +9,7 @@ pub fn get_url(item_name: &str) -> String {
     url + "&page{}"
 }
 #[allow(dead_code)]
-#[derive(Debug)]
+#[derive(Serialize)]
 pub struct RecordResults {
     description: String,
     price: String,
