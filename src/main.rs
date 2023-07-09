@@ -1,6 +1,9 @@
 #[macro_use]
 extern crate rocket;
-
+pub mod routes;
 pub mod web_walkers;
-#[tokio::main]
-async fn main() {}
+
+#[launch]
+fn rocket() -> _ {
+    rocket::build().mount("/", routes![routes::index])
+}
