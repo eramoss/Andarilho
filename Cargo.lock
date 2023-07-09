@@ -33,6 +33,7 @@ dependencies = [
  "regex",
  "rocket",
  "serde",
+ "serde_json",
  "thirtyfour",
  "tokio",
 ]
