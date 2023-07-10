@@ -1,7 +1,18 @@
 use thirtyfour::prelude::*;
 
 pub mod amazon_walker;
+pub mod amazon_walker_test;
 
+///  This function assume that you have a web server of selenium running on port 4444
+///  
+///  # Returns
+///  A `WebDriverResult` containing a `WebDriver` struct with extracted tags.
+///  
+///  # Example
+/// ```rust
+///   let driver = start_driver();
+///   driver.goto("your_web_page.com");
+/// ```
 pub async fn start_driver() -> WebDriverResult<WebDriver> {
     // Configure Firefox options to run in headless mode.
     let mut caps = DesiredCapabilities::firefox();
