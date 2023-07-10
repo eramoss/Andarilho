@@ -1,5 +1,5 @@
 use super::*;
-
+use urlencoding::encode;
 /// This function takes an `item_name` as input and returns a formatted URL string.
 /// # Arguments
 /// * `item_name` - A string slice (`&str`) representing the name of the item to be searched on Amazon.
@@ -19,12 +19,12 @@ use super::*;
 /// and creates a URL string using the formatted URL pattern: `https://www.amazon.com.br/s?k={item_name}&ref=nb_sb_noss_1&page{}`.
 /// The resulting URL is then returned by the function.
 pub fn get_url(item_name: &str) -> String {
-    let item_name = item_name.replace(' ', "+");
+    let encoded_item_name = encode(item_name);
     let url = format!(
-        "https://www.amazon.com.br/s?k={}&ref=nb_sb_noss_1",
-        item_name
+        "https://www.amazon.com.br/s?k={}&ref=nb_sb_noss_1&page",
+        encoded_item_name
     );
-    url + "&page"
+    url
 }
 
 /// Asynchronously extracts information from the provided `RecordTags` and returns a `RecordResults` struct.

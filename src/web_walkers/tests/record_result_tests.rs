@@ -1,5 +1,5 @@
 #[cfg(test)]
-mod test {
+mod record_result_tests {
     use serde_json::json;
 
     use crate::web_walkers::RecordResults;
