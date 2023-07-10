@@ -4,10 +4,11 @@ pub mod amazon_walker;
 
 pub async fn start_driver() -> WebDriverResult<WebDriver> {
     // Configure Firefox options to run in headless mode.
-    let caps = DesiredCapabilities::firefox();
-
+    let mut caps = DesiredCapabilities::firefox();
+    caps.add_firefox_arg("-headless")
+        .expect("Cannot open Firefox without window");
     // Create a new WebDriver instance.
-    let driver = WebDriver::new("http://localhost:4444/", caps).await?;
+    let driver = WebDriver::new("http://0.0.0.0:4444/", caps).await?;
     Ok(driver)
 }
 
