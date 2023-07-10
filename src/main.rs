@@ -6,5 +6,5 @@ use routes::*;
 
 #[launch]
 fn rocket() -> _ {
-    rocket::build().mount("/", routes![amazon_search_all::get_all])
+    rocket::build().mount("/", routes![amazon_routes::get_all])
 }

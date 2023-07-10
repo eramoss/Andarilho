@@ -1,1 +1,1 @@
-pub mod amazon_search_all;
+pub mod amazon_routes;
