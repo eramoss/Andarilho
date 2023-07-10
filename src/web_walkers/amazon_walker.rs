@@ -1,30 +1,5 @@
 use super::*;
-use serde::Serialize;
 
-#[derive(Serialize)]
-pub struct RecordResults {
-    description: String,
-    price: String,
-    review: String,
-    url: String,
-}
-
-impl RecordResults {
-    pub fn new(description: &str, price: &str, review: &str, url: &str) -> RecordResults {
-        RecordResults {
-            description: description.to_string(),
-            price: price.to_string(),
-            review: review.to_string(),
-            url: url.to_string(),
-        }
-    }
-}
-struct RecordTags {
-    anchor_tag: WebElement,
-    description_tag: WebElement,
-    price_tag: WebElement,
-    review_tag: Option<WebElement>,
-}
 /// This function takes an `item_name` as input and returns a formatted URL string.
 /// # Arguments
 /// * `item_name` - A string slice (`&str`) representing the name of the item to be searched on Amazon.
