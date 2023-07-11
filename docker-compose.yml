@@ -5,9 +5,14 @@ services:
       context: .
       dockerfile: Dockerfile
     network_mode: 'host'
+    environment:
+      - ROCKET_PORT=80
     depends_on:
       - selenium
   selenium:
     image: selenium/standalone-firefox:latest
+    environment:
+      - SE_NODE_OVERRIDE_MAX_SESSIONS=true
+      - SE_NODE_MAX_SESSIONS=6
     ports:
       - 4444:4444
