@@ -1,0 +1,13 @@
+version: '3'
+services:
+  andarilho:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    network_mode: 'host'
+    depends_on:
+      - selenium
+  selenium:
+    image: selenium/standalone-firefox:latest
+    ports:
+      - 4444:4444
