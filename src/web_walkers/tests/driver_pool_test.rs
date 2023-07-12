@@ -7,10 +7,7 @@ mod tests_pool {
         let pool = WebDriverPool::new(4).await.unwrap();
         assert_eq!(pool.workers.len(), 4);
         for workers in pool.workers {
-            assert_eq!(
-                workers.status().await.unwrap().message,
-                "Selenium Grid ready."
-            );
+            assert!(workers.status().await.unwrap().ready);
         }
     }
 
