@@ -3,17 +3,14 @@ pub mod driver_pool;
 pub mod tests;
 
 use self::driver_pool::WebDriverPool;
-use lazy_static::lazy_static;
+
 use serde::{Deserialize, Serialize};
 use thirtyfour::prelude::*;
-use tokio::sync::Mutex;
 
-lazy_static! {
-    static ref POOL: Mutex<Option<WebDriverPool>> = Mutex::new(None);
-}
+static mut POOL: Option<WebDriverPool> = None;
 
 pub async fn start_global_pool() -> WebDriverResult<bool> {
-    let mut pool = POOL.lock().await;
+    let pool = unsafe { &mut POOL };
     if pool.is_none() {
         *pool = Some(WebDriverPool::new(4).await.unwrap());
     }
@@ -46,7 +43,7 @@ pub struct RecordTags {
 }
 
 pub async fn search_on_amazon(item_name: &str) -> WebDriverResult<Vec<RecordResults>> {
-    let mut pool = POOL.lock().await;
+    let pool = unsafe { &mut POOL };
     let driver = pool.as_mut().unwrap().get_driver().unwrap();
 
     driver.goto(amazon_walker::get_url(item_name)).await?;
