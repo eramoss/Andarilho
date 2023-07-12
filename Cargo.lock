@@ -30,6 +30,7 @@ dependencies = [
 name = "andarilho"
 version = "0.1.0"
 dependencies = [
+ "futures",
  "regex",
  "rocket",
  "serde",

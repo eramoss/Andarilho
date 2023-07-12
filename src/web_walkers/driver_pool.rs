@@ -7,7 +7,7 @@ pub struct WebDriverPool {
 impl WebDriverPool {
     pub async fn new(max_workers: usize) -> WebDriverResult<WebDriverPool> {
         let mut workers = Vec::with_capacity(max_workers);
-        for _ in 0..workers.len() {
+        for _ in 0..max_workers {
             // Configure Firefox options to run in headless mode.
             let mut caps = DesiredCapabilities::firefox();
             caps.add_firefox_arg("-headless")
@@ -17,5 +17,13 @@ impl WebDriverPool {
             workers.push(driver);
         }
         Ok(WebDriverPool { workers })
+    }
+
+    pub fn get_driver(&mut self) -> Option<WebDriver> {
+        self.workers.pop()
+    }
+
+    pub fn return_driver(&mut self, driver: WebDriver) {
+        self.workers.push(driver);
     }
 }
