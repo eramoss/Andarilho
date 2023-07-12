@@ -1,9 +1,9 @@
-use thirtyfour::prelude::*;
-
 pub mod amazon_walker;
+pub mod driver_pool;
 pub mod tests;
 
 use serde::{Deserialize, Serialize};
+use thirtyfour::prelude::*;
 
 #[derive(Serialize, Deserialize)]
 pub struct RecordResults {
