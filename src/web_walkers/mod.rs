@@ -5,6 +5,7 @@ pub mod tests;
 use serde::{Deserialize, Serialize};
 use thirtyfour::prelude::*;
 
+pub fn start_driver_pool() {}
 #[derive(Serialize, Deserialize)]
 pub struct RecordResults {
     description: String,
