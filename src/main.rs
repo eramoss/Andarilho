@@ -6,12 +6,12 @@ use rocket::Config;
 use routes::*;
 use std::env;
 use std::net::Ipv4Addr;
-use web_walkers::start_global_pool;
+use web_walkers::driver_pool::*;
 
 #[launch]
 async fn rocket() -> _ {
-    tokio::time::sleep(tokio::time::Duration::new(5, 0)).await;
-    start_global_pool().await.unwrap();
+    tokio::time::sleep(tokio::time::Duration::new(3, 0)).await;
+    get_global_pool().await.unwrap();
     let mut config = Config::default();
 
     config.address = Ipv4Addr::new(0, 0, 0, 0).try_into().unwrap();

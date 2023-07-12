@@ -2,21 +2,9 @@ pub mod amazon_walker;
 pub mod driver_pool;
 pub mod tests;
 
-use self::driver_pool::WebDriverPool;
-
+use driver_pool::*;
 use serde::{Deserialize, Serialize};
 use thirtyfour::prelude::*;
-
-static mut POOL: Option<WebDriverPool> = None;
-
-pub async fn start_global_pool() -> WebDriverResult<bool> {
-    let pool = unsafe { &mut POOL };
-    if pool.is_none() {
-        *pool = Some(WebDriverPool::new(4).await.unwrap());
-    }
-    Ok(true)
-}
-
 #[derive(Serialize, Deserialize)]
 pub struct RecordResults {
     description: String,
@@ -43,33 +31,12 @@ pub struct RecordTags {
 }
 
 pub async fn search_on_amazon(item_name: &str) -> WebDriverResult<Vec<RecordResults>> {
-    let pool = unsafe { &mut POOL };
-    let driver = pool.as_mut().unwrap().get_driver().unwrap();
+    let pool = get_global_pool().await?;
+    let driver = pool.get_driver().unwrap();
 
     driver.goto(amazon_walker::get_url(item_name)).await?;
     let result = amazon_walker::get_all_records(&driver).await;
 
-    pool.as_mut().unwrap().return_driver(driver);
+    pool.return_driver(driver);
     result
 }
-
-///  This function assume that you have a web server of selenium running on port 4444
-///  
-///  # Returns
-///  A `WebDriverResult` containing a `WebDriver` struct with extracted tags.
-///  
-///  # Example
-/// ```rust
-///   let driver = start_driver();
-///   driver.goto("your_web_page.com");
-/// ```
-/// # WARNING: UNUSED FUNCTION!!!
-pub async fn start_driver() -> WebDriverResult<WebDriver> {
-    // Configure Firefox options to run in headless mode.
-    let mut caps = DesiredCapabilities::firefox();
-    caps.add_firefox_arg("-headless")
-        .expect("Cannot open Firefox without window");
-    // Create a new WebDriver instance.
-    let driver = WebDriver::new("http://0.0.0.0:4444/", caps).await?;
-    Ok(driver)
-} /////////////////////////

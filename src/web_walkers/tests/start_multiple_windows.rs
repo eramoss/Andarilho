@@ -1,10 +1,11 @@
 #[cfg(test)]
 mod tests {
-    use crate::web_walkers::start_driver;
+    use crate::web_walkers::driver_pool::*;
 
     #[tokio::test]
     async fn start_two_windows_same_driver() {
-        let driver = start_driver().await.unwrap();
+        let pool = get_global_pool().await.unwrap();
+        let driver = pool.get_driver().unwrap();
 
         let handle = driver.new_tab().await.unwrap();
         driver.switch_to_window(handle).await.unwrap();
@@ -23,5 +24,6 @@ mod tests {
         let title_rust = driver.title().await.unwrap();
 
         assert_ne!(title_rust, title_github);
+        pool.return_driver(driver);
     }
 }
