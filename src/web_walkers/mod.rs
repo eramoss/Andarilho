@@ -1,24 +1,9 @@
+use thirtyfour::prelude::*;
+
 pub mod amazon_walker;
-pub mod driver_pool;
 pub mod tests;
 
-use self::driver_pool::WebDriverPool;
-use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
-use thirtyfour::prelude::*;
-use tokio::sync::Mutex;
-
-lazy_static! {
-    static ref POOL: Mutex<Option<WebDriverPool>> = Mutex::new(None);
-}
-
-pub async fn start_global_pool() -> WebDriverResult<bool> {
-    let mut pool = POOL.lock().await;
-    if pool.is_none() {
-        *pool = Some(WebDriverPool::new(4).await.unwrap());
-    }
-    Ok(true)
-}
 
 #[derive(Serialize, Deserialize)]
 pub struct RecordResults {
@@ -44,18 +29,6 @@ pub struct RecordTags {
     price_tag: WebElement,
     review_tag: Option<WebElement>,
 }
-
-pub async fn search_on_amazon(item_name: &str) -> WebDriverResult<Vec<RecordResults>> {
-    let mut pool = POOL.lock().await;
-    let driver = pool.as_mut().unwrap().get_driver().unwrap();
-
-    driver.goto(amazon_walker::get_url(item_name)).await?;
-    let result = amazon_walker::get_all_records(&driver).await;
-
-    pool.as_mut().unwrap().return_driver(driver);
-    result
-}
-
 ///  This function assume that you have a web server of selenium running on port 4444
 ///  
 ///  # Returns
@@ -66,7 +39,6 @@ pub async fn search_on_amazon(item_name: &str) -> WebDriverResult<Vec<RecordResu
 ///   let driver = start_driver();
 ///   driver.goto("your_web_page.com");
 /// ```
-/// # WARNING: UNUSED FUNCTION!!!
 pub async fn start_driver() -> WebDriverResult<WebDriver> {
     // Configure Firefox options to run in headless mode.
     let mut caps = DesiredCapabilities::firefox();
@@ -75,4 +47,12 @@ pub async fn start_driver() -> WebDriverResult<WebDriver> {
     // Create a new WebDriver instance.
     let driver = WebDriver::new("http://0.0.0.0:4444/", caps).await?;
     Ok(driver)
-} /////////////////////////
+}
+
+pub async fn search_on_amazon(item_name: &str) -> WebDriverResult<Vec<RecordResults>> {
+    let driver = start_driver().await?;
+    driver.goto(amazon_walker::get_url(item_name)).await?;
+    let result = amazon_walker::get_all_records(&driver).await;
+    driver.quit().await?;
+    result
+}
