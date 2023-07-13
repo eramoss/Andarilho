@@ -11,8 +11,6 @@ services:
       - selenium
   selenium:
     image: selenium/standalone-firefox:latest
-    environment:
-      - SE_NODE_OVERRIDE_MAX_SESSIONS=true
-      - SE_NODE_MAX_SESSIONS=6
+    shm_size: 2gb
     ports:
       - 4444:4444
