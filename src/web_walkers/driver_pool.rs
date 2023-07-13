@@ -40,8 +40,8 @@ pub async fn get_global_pool() -> WebDriverResult<&'static mut WebDriverPool> {
                 .parse()
                 .expect("cannot parse SE_NODE_MAX_SESSIONS, must be a positive integer"),
             Err(_) => {
-                println!("SE_NODE_MAX_SESSIONS no declared, set to 1");
-                1
+                println!("SE_NODE_MAX_SESSIONS no declared, set to 2");
+                2
             }
         };
         *pool = Some(WebDriverPool::new(max_nodes - 1).await.unwrap());
