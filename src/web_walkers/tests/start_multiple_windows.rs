@@ -1,10 +1,12 @@
 #[cfg(test)]
 mod tests {
-    use crate::web_walkers::start_driver;
+
+    // to run all tests, make sure that the your selenium server is running and accept more than 1 driver instance
+    use crate::web_walkers::global_driver::*;
 
     #[tokio::test]
     async fn start_two_windows_same_driver() {
-        let driver = start_driver().await.unwrap();
+        let driver = get_driver().await.unwrap();
 
         let handle = driver.new_tab().await.unwrap();
         driver.switch_to_window(handle).await.unwrap();
@@ -23,5 +25,20 @@ mod tests {
         let title_rust = driver.title().await.unwrap();
 
         assert_ne!(title_rust, title_github);
+    }
+
+    #[tokio::test]
+    async fn get_two_drivers_as_mistake() {
+        //make sure that every time you get a driver, change the page with
+        //driver.new_tab()
+        let driver_one = get_driver().await.unwrap();
+        let driver_two = get_driver().await.unwrap();
+
+        driver_one.goto("https://github.com").await.unwrap();
+
+        assert_eq!(
+            driver_one.title().await.unwrap(),
+            driver_two.title().await.unwrap()
+        );
     }
 }
