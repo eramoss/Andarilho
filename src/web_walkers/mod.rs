@@ -2,9 +2,10 @@ pub mod amazon_walker;
 pub mod driver_pool;
 pub mod tests;
 
-use driver_pool::*;
 use serde::{Deserialize, Serialize};
 use thirtyfour::prelude::*;
+
+use self::driver_pool::get_global_pool;
 #[derive(Serialize, Deserialize)]
 pub struct RecordResults {
     description: String,
@@ -32,11 +33,9 @@ pub struct RecordTags {
 
 pub async fn search_on_amazon(item_name: &str) -> WebDriverResult<Vec<RecordResults>> {
     let pool = get_global_pool().await?;
-    let driver = pool.get_driver().unwrap();
-
+    let driver = pool.get_driver().await.unwrap();
     driver.goto(amazon_walker::get_url(item_name)).await?;
     let result = amazon_walker::get_all_records(&driver).await;
-
     pool.return_driver(driver);
     result
 }

@@ -14,7 +14,7 @@ mod tests_pool {
     #[tokio::test]
     async fn execute_with_worker() {
         let mut pool = WebDriverPool::new(4).await.unwrap();
-        let driver = pool.get_driver().unwrap();
+        let driver = pool.get_driver().await.unwrap();
         driver.goto("https://www.rust-lang.org").await.unwrap();
         assert_eq!(driver.title().await.unwrap(), "Rust Programming Language");
         pool.return_driver(driver);

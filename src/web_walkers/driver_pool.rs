@@ -1,7 +1,36 @@
-use std::env;
+use std::{env, time::Duration};
 use thirtyfour::prelude::*;
 
 static mut POOL: Option<WebDriverPool> = None;
+
+pub struct WebDriverPool {
+    pub workers: Vec<WebDriver>,
+}
+
+impl WebDriverPool {
+    pub async fn new(max_workers: usize) -> WebDriverResult<WebDriverPool> {
+        let mut workers = Vec::with_capacity(max_workers);
+        for _ in 0..max_workers {
+            let driver = start_driver().await?;
+            workers.push(driver);
+        }
+        Ok(WebDriverPool { workers })
+    }
+
+    pub async fn get_driver(&mut self) -> Option<WebDriver> {
+        loop {
+            if let Some(driver) = self.workers.pop() {
+                return Some(driver);
+            } else {
+                tokio::time::sleep(Duration::from_secs(1)).await;
+            }
+        }
+    }
+
+    pub fn return_driver(&mut self, driver: WebDriver) {
+        self.workers.push(driver);
+    }
+}
 
 pub async fn get_global_pool() -> WebDriverResult<&'static mut WebDriverPool> {
     let pool: &mut Option<WebDriverPool> = unsafe { &mut POOL };
@@ -19,6 +48,7 @@ pub async fn get_global_pool() -> WebDriverResult<&'static mut WebDriverPool> {
     }
     Ok(pool.as_mut().unwrap())
 }
+
 ///  This function assume that you have a web server of selenium running on port 4444
 ///  
 ///  # Returns
@@ -38,27 +68,4 @@ async fn start_driver() -> WebDriverResult<WebDriver> {
     // Create a new WebDriver instance.
     let driver = WebDriver::new("http://0.0.0.0:4444/", caps).await?;
     Ok(driver)
-}
-
-pub struct WebDriverPool {
-    pub workers: Vec<WebDriver>,
-}
-
-impl WebDriverPool {
-    pub async fn new(max_workers: usize) -> WebDriverResult<WebDriverPool> {
-        let mut workers = Vec::with_capacity(max_workers);
-        for _ in 0..max_workers {
-            let driver = start_driver().await?;
-            workers.push(driver);
-        }
-        Ok(WebDriverPool { workers })
-    }
-
-    pub fn get_driver(&mut self) -> Option<WebDriver> {
-        self.workers.pop()
-    }
-
-    pub fn return_driver(&mut self, driver: WebDriver) {
-        self.workers.push(driver);
-    }
 }

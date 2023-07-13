@@ -5,7 +5,7 @@ mod tests {
     #[tokio::test]
     async fn start_two_windows_same_driver() {
         let pool = get_global_pool().await.unwrap();
-        let driver = pool.get_driver().unwrap();
+        let driver = pool.get_driver().await.unwrap();
 
         let handle = driver.new_tab().await.unwrap();
         driver.switch_to_window(handle).await.unwrap();
