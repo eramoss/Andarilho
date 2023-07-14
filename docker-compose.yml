@@ -5,9 +5,13 @@ services:
       context: .
       dockerfile: Dockerfile
     network_mode: 'host'
+    env_file:
+      - .env
     depends_on:
       - selenium
   selenium:
     image: selenium/standalone-firefox:latest
     ports:
       - 4444:4444
+    env_file:
+      - .env
