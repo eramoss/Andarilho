@@ -35,6 +35,27 @@ impl WebDriverPool {
     }
 }
 
+/// This function get a pool that has instantiated with `init_global_pool`
+/// If has not been initialized yet. The function will initialize the pool
+///
+/// # Returns
+///  `WebDriverResult<&'static mut WebDriverPool>`
+///
+/// # Example
+/// ``` rust
+///     // Init pool or get it from `get_global_pool()`;
+///     init_global_pool().await;
+///     let pool = get_global_pool().await.expect("Cannot get global pool");
+///
+///     // Get a driver instance of pool to use
+///     let driver = pool.get_driver().await.unwrap();
+///
+///     driver.goto("https://www.rust-lang.org").await.unwrap();
+///     assert_eq!(driver.title().await.unwrap(), "Rust Programming Language");
+///
+///     //after use return driver for pool
+///     pool.return_driver(driver);
+/// ```
 pub async fn get_global_pool() -> WebDriverResult<&'static mut WebDriverPool> {
     let pool: &mut Option<WebDriverPool> = unsafe { &mut POOL };
     if pool.is_none() {
