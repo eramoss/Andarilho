@@ -10,10 +10,9 @@ use web_walkers::driver_pool::*;
 
 #[launch]
 async fn rocket() -> _ {
-    tokio::time::sleep(tokio::time::Duration::new(3, 0)).await;
-    get_global_pool().await.unwrap();
-    let mut config = Config::default();
+    init_global_pool().await;
 
+    let mut config = Config::default();
     config.address = Ipv4Addr::new(0, 0, 0, 0).try_into().unwrap();
     config.port = match env::var("ROCKET_PORT") {
         Ok(port) => port

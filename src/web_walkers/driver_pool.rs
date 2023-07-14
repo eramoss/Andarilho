@@ -19,7 +19,10 @@ impl WebDriverPool {
 
     pub async fn get_driver(&mut self) -> Option<WebDriver> {
         loop {
-            if let Some(driver) = self.workers.pop() {
+            if let Some(mut driver) = self.workers.pop() {
+                if driver.status().await.unwrap().ready == false {
+                    driver = start_driver().await.unwrap();
+                }
                 return Some(driver);
             } else {
                 tokio::time::sleep(Duration::from_secs(1)).await;
@@ -35,18 +38,27 @@ impl WebDriverPool {
 pub async fn get_global_pool() -> WebDriverResult<&'static mut WebDriverPool> {
     let pool: &mut Option<WebDriverPool> = unsafe { &mut POOL };
     if pool.is_none() {
-        let max_nodes: usize = match env::var("SE_NODE_MAX_SESSIONS") {
-            Ok(n) => n
-                .parse()
-                .expect("cannot parse SE_NODE_MAX_SESSIONS, must be a positive integer"),
-            Err(_) => {
-                println!("SE_NODE_MAX_SESSIONS no declared, set to 2");
-                2
-            }
-        };
-        *pool = Some(WebDriverPool::new(max_nodes - 1).await.unwrap());
+        init_global_pool().await;
     }
     Ok(pool.as_mut().unwrap())
+}
+
+pub async fn init_global_pool() {
+    // await for init selenium server
+    tokio::time::sleep(tokio::time::Duration::new(2, 0)).await;
+
+    let pool: &mut Option<WebDriverPool> = unsafe { &mut POOL };
+    let max_nodes: usize = match env::var("POOL_SIZE") {
+        Ok(n) => n
+            .parse()
+            .expect("cannot parse POOL_SIZE, must be a positive integer"),
+        Err(_) => {
+            println!("POOL_SIZE no declared, set to 1");
+            1
+        }
+    };
+
+    *pool = Some(WebDriverPool::new(max_nodes).await.unwrap());
 }
 
 ///  This function assume that you have a web server of selenium running on port 4444
