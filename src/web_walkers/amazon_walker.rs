@@ -52,21 +52,12 @@ pub fn get_url(item_name: &str) -> String {
 async fn extract_info_from_tags(record_tags: RecordTags) -> WebDriverResult<RecordResults> {
     let description = record_tags.description_tag.text().await?;
 
-    let price = record_tags
-        .price_tag
-        .inner_html()
-        .await?
-        .replace("&nbsp;", "");
+    let price = record_tags.price_tag.inner_html().await?;
+    let price = price.replace("&nbsp;", "");
 
-    let mut url = "https://www.amazon.com.br/".to_string();
-    url.push_str(
-        record_tags
-            .anchor_tag
-            .attr("href")
-            .await?
-            .expect("The item must have a link")
-            .as_str(),
-    );
+    let template_url = "https://www.amazon.com.br/".to_string();
+    let url = record_tags.anchor_tag.attr("href").await?.unwrap();
+    let url = template_url + url.as_str();
 
     let mut review = String::new();
     if record_tags.review_tag.is_some() {
@@ -108,10 +99,10 @@ async fn extract_info_from_tags(record_tags: RecordTags) -> WebDriverResult<Reco
 /// containing these tags and returns it as a result.
 async fn extract_tags(item: WebElement) -> WebDriverResult<RecordTags> {
     // find the items as a tag and extract the record
-    let title_item_tag = item.find_all(By::Css("h2")).await?;
-    let anchor_tag = title_item_tag[title_item_tag.len() - 1]
-        .find(By::Css("a"))
-        .await?;
+    let all_tilte_tags_in_item = item.find_all(By::Css("h2")).await?;
+    let item_title_tag = all_tilte_tags_in_item.last().unwrap();
+
+    let anchor_tag = item_title_tag.find(By::Css("a")).await?;
     let description_tag = anchor_tag.find(By::Css("span")).await?;
     let price_tag = item.find(By::Css(".a-offscreen")).await?;
     let review_tag = match item.find(By::Css(".a-icon-alt")).await {
