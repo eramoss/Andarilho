@@ -45,7 +45,7 @@ pub async fn get_global_pool() -> WebDriverResult<&'static mut WebDriverPool> {
 
 pub async fn init_global_pool() {
     // await for init selenium server
-    tokio::time::sleep(tokio::time::Duration::new(2, 0)).await;
+    tokio::time::sleep(tokio::time::Duration::new(3, 0)).await;
 
     let pool: &mut Option<WebDriverPool> = unsafe { &mut POOL };
     let max_nodes: usize = match env::var("POOL_SIZE") {
