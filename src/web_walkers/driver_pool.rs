@@ -19,11 +19,16 @@ impl WebDriverPool {
 
     pub async fn get_driver(&mut self) -> Option<WebDriver> {
         loop {
-            if let Some(mut driver) = self.workers.pop() {
-                if driver.status().await.unwrap().ready == false {
-                    driver = start_driver().await.unwrap();
+            if let Some(driver) = self.workers.pop() {
+                match driver.delete_cookie("").await {
+                    Ok(_) => {
+                        return Some(driver);
+                    }
+                    Err(_) => {
+                        let driver = start_driver().await.unwrap();
+                        return Some(driver);
+                    }
                 }
-                return Some(driver);
             } else {
                 tokio::time::sleep(Duration::from_secs(1)).await;
             }
@@ -66,7 +71,7 @@ pub async fn get_global_pool() -> WebDriverResult<&'static mut WebDriverPool> {
 
 pub async fn init_global_pool() {
     // await for init selenium server
-    tokio::time::sleep(tokio::time::Duration::new(3, 0)).await;
+    tokio::time::sleep(tokio::time::Duration::new(4, 0)).await;
 
     let pool: &mut Option<WebDriverPool> = unsafe { &mut POOL };
     let max_nodes: usize = match env::var("POOL_SIZE") {
