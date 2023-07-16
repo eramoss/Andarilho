@@ -19,16 +19,11 @@ impl WebDriverPool {
 
     pub async fn get_driver(&mut self) -> Option<WebDriver> {
         loop {
-            if let Some(driver) = self.workers.pop() {
-                match driver.delete_cookie("").await {
-                    Ok(_) => {
-                        return Some(driver);
-                    }
-                    Err(_) => {
-                        let driver = start_driver().await.unwrap();
-                        return Some(driver);
-                    }
+            if let Some(mut driver) = self.workers.pop() {
+                if !is_alive(&driver).await {
+                    driver = start_driver().await.unwrap();
                 }
+                return Some(driver);
             } else {
                 tokio::time::sleep(Duration::from_secs(1)).await;
             }
@@ -37,6 +32,14 @@ impl WebDriverPool {
 
     pub fn return_driver(&mut self, driver: WebDriver) {
         self.workers.push(driver);
+    }
+}
+
+async fn is_alive(driver: &WebDriver) -> bool {
+    match driver.delete_cookie("").await {
+        // just make some action with driver to get an error
+        Ok(_) => true,
+        Err(_) => false,
     }
 }
 
@@ -97,7 +100,6 @@ pub async fn init_global_pool() {
 ///   let driver = start_driver();
 ///   driver.goto("your_web_page.com");
 /// ```
-/// # WARNING: UNUSED FUNCTION!!!
 async fn start_driver() -> WebDriverResult<WebDriver> {
     // Configure Firefox options to run in headless mode.
     let mut caps = DesiredCapabilities::firefox();

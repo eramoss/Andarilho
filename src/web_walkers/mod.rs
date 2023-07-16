@@ -2,10 +2,9 @@ pub mod amazon_walker;
 pub mod driver_pool;
 pub mod tests;
 
+use self::driver_pool::get_global_pool;
 use serde::{Deserialize, Serialize};
 use thirtyfour::prelude::*;
-
-use self::driver_pool::get_global_pool;
 #[derive(Serialize, Deserialize)]
 pub struct RecordResults {
     description: String,
