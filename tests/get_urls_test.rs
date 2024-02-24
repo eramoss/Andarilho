@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod get_urls_test {
-    use crate::web_walkers::*;
+    use andarilho::web_walkers::*;
 
     #[test]
     fn test_get_url() {

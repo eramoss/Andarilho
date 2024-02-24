@@ -1,12 +1,11 @@
 #[macro_use]
 extern crate rocket;
-pub mod routes;
-pub mod web_walkers;
+
+use andarilho::routes::amazon_routes;
+use andarilho::wd_pool::init_global_pool;
 use rocket::Config;
-use routes::*;
 use std::env;
 use std::net::Ipv4Addr;
-use web_walkers::driver_pool::*;
 
 #[launch]
 async fn rocket() -> _ {

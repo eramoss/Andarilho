@@ -2,7 +2,7 @@
 mod tests {
     use thirtyfour::By;
 
-    use crate::web_walkers::driver_pool::get_global_pool;
+    use andarilho::wd_pool::get_global_pool;
 
     #[tokio::test]
     async fn test_get_element_as_string() {

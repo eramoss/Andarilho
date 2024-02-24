@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use crate::web_walkers::driver_pool::*;
+    use andarilho::wd_pool::*;
 
     #[tokio::test]
     async fn start_two_windows_same_driver() {

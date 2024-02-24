@@ -1,8 +1,7 @@
 #[cfg(test)]
 mod record_result_tests {
+    use andarilho::RecordResults;
     use serde_json::json;
-
-    use crate::web_walkers::RecordResults;
 
     #[test]
     fn serialize_record_result() {

@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests_pool {
-    use crate::web_walkers::driver_pool::*;
+    use andarilho::wd_pool::*;
 
     const POOL_SIZE: usize = 1;
     #[tokio::test]

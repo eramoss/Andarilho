@@ -1,4 +1,5 @@
-use super::*;
+use crate::{wd_pool::*, RecordResults, RecordTags};
+use thirtyfour::prelude::*;
 use urlencoding::encode;
 /// This function takes an `item_name` as input and returns a formatted URL string.
 /// # Arguments
@@ -187,4 +188,13 @@ pub async fn get_all_records(driver: &WebDriver) -> WebDriverResult<Vec<RecordRe
     }
 
     Ok(records)
+}
+
+pub async fn search_on_amazon(item_name: &str) -> WebDriverResult<Vec<RecordResults>> {
+    let pool = get_global_pool().await?;
+    let driver = pool.get_driver().await.unwrap();
+    driver.goto(get_url(item_name)).await?;
+    let result = get_all_records(&driver).await;
+    pool.return_driver(driver);
+    result
 }
