@@ -1,7 +1,95 @@
+use std::future::Future;
+use std::ops::Deref;
+use std::pin::Pin;
+use std::sync::{mpsc, Arc};
+use std::task::{Context, Poll};
 use std::{env, time::Duration};
 use thirtyfour::prelude::*;
-
+use thirtyfour::session::handle::SessionHandle;
+use tokio::sync::Mutex;
 static mut POOL: Option<WebDriverPool> = None;
+
+type Job<A> = Box<
+    dyn FnOnce(&SessionHandle) -> Box<dyn Future<Output = A> + 'static + Unpin> + 'static + Send,
+>;
+
+// New type implementing Future
+struct JobFuture<A> {
+    job: Option<Job<A>>,
+    session_handle: SessionHandle,
+}
+
+impl<'a, A> Future for JobFuture<A> {
+    type Output = A;
+
+    fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
+        let job = self.job.take().expect("polled after completion");
+        let future = job(&self.session_handle);
+        // Pin the future and poll it
+        let mut pinned_future = Box::pin(future);
+        pinned_future.as_mut().poll(cx)
+    }
+}
+struct WdPool<A> {
+    workers: Vec<Worker>,
+    senders: mpsc::Sender<Job<A>>,
+}
+
+impl<A> WdPool<A> {
+    async fn new(max_workers: usize) -> WebDriverResult<WdPool<A>> {
+        let mut workers = Vec::with_capacity(max_workers);
+        let (tx, rx) = mpsc::channel();
+        let rx = Arc::new(Mutex::new(rx));
+        for _ in 0..max_workers {
+            let driver = start_driver().await?;
+            let worker = Worker {
+                id: driver.session_id().await.unwrap().to_string(),
+                session: driver.handle,
+            };
+            workers.push(worker);
+        }
+        Ok(WdPool {
+            workers,
+            senders: tx,
+        })
+    }
+
+    fn execute<F>(&self, job: Job<A>)
+    where
+        A: 'static,
+    {
+        self.senders
+            .send(Box::new(move |handle| job(handle)))
+            .unwrap();
+    }
+}
+
+struct Worker {
+    id: String,
+    session: SessionHandle,
+}
+
+impl Worker {
+    async fn new<A>(
+        id: String,
+        receiver: Arc<Mutex<mpsc::Receiver<Job<A>>>>,
+        session: SessionHandle,
+    ) -> Worker
+    where
+        A: 'static + Send,
+    {
+        let session_handle = session.clone(); // Cloning the session handle for tokio::spawn
+        tokio::spawn(async move {
+            let job_future = JobFuture::<A> {
+                job: Some(receiver.lock().await.recv().unwrap()),
+                session_handle: session_handle, // Cloning inside the closure
+            };
+            job_future.await;
+        });
+
+        Worker { id, session }
+    }
+}
 
 pub struct WebDriverPool {
     pub workers: Vec<WebDriver>,
